@@ -2,7 +2,7 @@
 .orchestrator.conf
 
 # Runtime files
-# next_check_note.txt
+next_check_note.txt
 
 # Logs and registry
 registry/logs/
