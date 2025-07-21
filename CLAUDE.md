@@ -7,19 +7,44 @@ The Tmux Orchestrator is an AI-powered session management system where Claude ac
 
 ### First-Time Setup
 
-1. **Set Environment Variables** (optional):
-   ```bash
-   # In your ~/.bashrc or ~/.zshrc
-   export PROJECTS_DIR="$HOME/code"  # Default: $HOME/code
-   export DEFAULT_SESSION_PREFIX="tmux-orc"  # Default: tmux-orc
-   ```
+**Run the setup script for automated configuration:**
 
-2. **The configuration file** (`config.sh`) automatically detects:
-   - Your orchestrator directory location
-   - Projects directory (defaults to `$HOME/code`)
-   - Creates necessary directories for logs and registry
+```bash
+cd /path/to/Tmux-Orchestrator
+./setup.sh
+```
 
-3. **All scripts now use relative paths** - no hardcoded user paths!
+The setup script will:
+- ✅ Check for required dependencies (tmux, bc, logger)
+- ✅ Detect or create a suitable projects directory
+- ✅ Allow customization of configuration
+- ✅ Create necessary directories for logs and registry
+- ✅ Set proper permissions on all scripts
+- ✅ Validate the configuration
+- ✅ Save settings to `.orchestrator.conf`
+
+### Manual Configuration (Advanced)
+
+If you prefer manual setup, set these environment variables:
+
+```bash
+# In your ~/.bashrc or ~/.zshrc
+export PROJECTS_DIR="/path/to/your/projects"  # Where your code projects live
+export DEFAULT_SESSION_PREFIX="tmux-orc"     # Default session prefix
+```
+
+### Directory Detection
+
+The orchestrator intelligently searches for projects in common locations:
+- `$PROJECTS_DIR` (if set)
+- `$HOME/code` (most common)
+- `$HOME/Code` (macOS default)  
+- `$HOME/projects`
+- `$HOME/workspace`
+- `$HOME/dev`
+- And several other common patterns
+
+**All scripts are now fully portable** - no hardcoded paths!
 
 ## Agent System Architecture
 
