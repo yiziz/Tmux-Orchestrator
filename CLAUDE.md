@@ -660,7 +660,7 @@ When a command fails:
 
 #### 🎯 IMPORTANT: Always Use send-claude-message.sh Script
 
-**DO NOT manually send messages with tmux send-keys anymore!** We have a dedicated script that handles all the timing and complexity for you.
+**DO NOT manually send messages with tmux send-keys anymore!** We have a robust, portable script that handles all validation, timing, and error handling.
 
 #### Using send-claude-message.sh
 ```bash
@@ -683,10 +683,11 @@ $(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh ai-chat:2 "STATUS UPDATE: 
 
 #### Why Use the Script?
 1. **Automatic timing**: Handles the critical 0.5s delay between message and Enter
-2. **Simpler commands**: One line instead of three
-3. **No timing mistakes**: Prevents the common error of Enter being sent too quickly
-4. **Works everywhere**: Handles both windows and panes automatically
-5. **Consistent messaging**: All agents receive messages the same way
+2. **Input validation**: Ensures proper tmux target format and message content
+3. **Error handling**: Validates sessions/windows exist before sending
+4. **Cross-platform**: Works on macOS, Linux, and other Unix systems
+5. **Logging**: All messages are logged for debugging and audit trails
+6. **Portable**: No hardcoded paths - works from any location
 
 #### Script Location and Usage
 - **Location**: `<orchestrator-directory>/send-claude-message.sh`
