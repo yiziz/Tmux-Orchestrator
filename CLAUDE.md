@@ -74,6 +74,168 @@ As the Orchestrator, you maintain high-level oversight without getting bogged do
 6. **Researcher**: Technology evaluation
 7. **Documentation Writer**: Technical documentation
 
+## 🎯 CRITICAL: SCOPE CONTROL FOR AI AGENTS
+
+### MANDATORY: Stay Within Assigned Task Boundaries
+
+**ALL AI AGENTS MUST STRICTLY ADHERE TO THESE RULES:**
+
+1. **Do Only What's Asked - Nothing More, Nothing Less**:
+   - If asked to "fix the login bug", ONLY fix the login bug
+   - DO NOT refactor unrelated code, add new features, or improve other areas
+   - DO NOT expand scope beyond the specific request
+
+2. **No Unauthorized Improvements**:
+   - DO NOT add logging, error handling, or optimizations unless explicitly requested
+   - DO NOT "make the code better" by adding features not asked for
+   - DO NOT implement related but unasked-for functionality
+
+3. **Minimal Change Principle**:
+   - Make the smallest possible change to achieve the requested outcome
+   - Touch as few files as possible
+   - Change as few lines as possible
+   - Preserve existing code style and patterns exactly
+
+4. **Get Permission Before Expanding**:
+   - If you discover related issues, ASK before fixing them
+   - If you see optimization opportunities, ASK before implementing them
+   - If scope seems unclear, ASK for clarification before proceeding
+
+5. **Status Updates Must Be Scope-Focused**:
+   ```
+   SCOPE CHECK:
+   Requested: [exactly what was asked]
+   Doing: [exactly what you're working on]
+   Not doing: [what you're deliberately avoiding]
+   Need permission for: [related items you found]
+   ```
+
+### Examples of GOOD vs BAD Scope Management
+
+#### ✅ GOOD: Fixing Authentication Bug
+```
+User Request: "Fix the authentication token expiration bug"
+Agent Action: 
+- Identified token refresh logic issue in auth.py line 45
+- Fixed the specific bug causing premature expiration
+- Tested the fix works
+- STOPPED there
+```
+
+#### ❌ BAD: Fixing Authentication Bug with Scope Creep
+```
+User Request: "Fix the authentication token expiration bug"
+Agent Action:
+- Fixed token expiration bug ✅
+- Added better error messages (NOT ASKED FOR) ❌
+- Refactored auth middleware for performance (NOT ASKED FOR) ❌
+- Added logging throughout auth system (NOT ASKED FOR) ❌
+- Updated documentation (NOT ASKED FOR) ❌
+```
+
+### Why This Matters
+- **Predictability**: User knows exactly what will change
+- **Safety**: Minimizes risk of introducing new bugs
+- **Efficiency**: Faster completion, less review time
+- **Trust**: User maintains control over their codebase
+
+### Project Managers Must Enforce This
+PMs are responsible for ensuring agents stay in scope:
+- Review all changes against original request
+- Stop agents who are expanding beyond assigned tasks
+- Escalate to orchestrator if scope creep persists
+
+## 🎨 MCP Tools for Design and Testing
+
+### Figma Integration (figma-mcp)
+
+**When provided a Figma link, ALWAYS use figma-mcp tools:**
+
+1. **Extract Design Data**:
+   ```bash
+   # Get comprehensive design data from Figma
+   mcp__figma-mcp__get_figma_data <fileKey> [nodeId]
+   
+   # Example: Extract specific component or page
+   mcp__figma-mcp__get_figma_data "abc123xyz" "123:456"
+   ```
+
+2. **Download Assets**:
+   ```bash
+   # Download images, icons, and SVG assets
+   mcp__figma-mcp__download_figma_images <fileKey> <localPath> <nodes>
+   
+   # Save to project assets folder
+   mcp__figma-mcp__download_figma_images "abc123xyz" "/project/src/assets" [node_array]
+   ```
+
+3. **Implementation Process**:
+   - Extract exact measurements, colors, fonts, and spacing
+   - Download all required images and icons
+   - Implement components to match pixel-perfect specifications
+   - Use exact color codes and typography from Figma
+
+### Frontend Testing (playwright-mcp)
+
+**ALWAYS verify frontend changes with playwright-mcp:**
+
+1. **Visual Verification**:
+   ```bash
+   # Take screenshots for comparison
+   mcp__playwright-mcp__playwright_screenshot <name> <options>
+   
+   # Navigate to your local development server
+   mcp__playwright-mcp__playwright_navigate "http://localhost:3000"
+   ```
+
+2. **Interaction Testing**:
+   ```bash
+   # Test clicks and form interactions
+   mcp__playwright-mcp__playwright_click <selector>
+   mcp__playwright-mcp__playwright_fill <selector> <value>
+   
+   # Verify user workflows work correctly
+   mcp__playwright-mcp__playwright_hover <selector>
+   ```
+
+3. **Responsive Testing**:
+   ```bash
+   # Test different viewport sizes
+   mcp__playwright-mcp__playwright_navigate <url> {width: 375, height: 667}  # Mobile
+   mcp__playwright-mcp__playwright_navigate <url> {width: 1024, height: 768}  # Tablet
+   mcp__playwright-mcp__playwright_navigate <url> {width: 1920, height: 1080} # Desktop
+   ```
+
+4. **Quality Assurance Process**:
+   - Screenshot each major component/page
+   - Test all interactive elements (buttons, forms, links)
+   - Verify responsive behavior on mobile/tablet/desktop
+   - Validate against Figma designs if provided
+   - Test edge cases and error states
+
+### When to Use These Tools
+
+**Figma-MCP**: 
+- User provides a Figma link
+- Need exact design specifications
+- Implementing new UI components
+- Updating existing components to match designs
+
+**Playwright-MCP**:
+- After any frontend code changes
+- Before considering a frontend task complete
+- When implementing new user interactions
+- Testing responsive design changes
+- Verifying cross-browser compatibility
+
+### Integration with Development Workflow
+
+1. **Design Phase**: Use figma-mcp to extract specifications
+2. **Implementation Phase**: Code to exact specifications  
+3. **Testing Phase**: Use playwright-mcp to verify implementation
+4. **Comparison Phase**: Screenshots vs Figma designs
+5. **Refinement Phase**: Adjust based on test results
+
 ## 🔐 Git Discipline - MANDATORY FOR ALL AGENTS
 
 ### Core Git Safety Rules
@@ -156,7 +318,7 @@ When Claude starts in the orchestrator, it should:
 ### Window Naming Convention
 Windows should be named based on their actual function:
 - **Claude Agents**: `Claude-Frontend`, `Claude-Backend`, `Claude-Convex`
-- **Dev Servers**: `NextJS-Dev`, `Frontend-Dev`, `Uvicorn-API`
+- **Dev Servers**: `NestJS-Dev`, `Frontend-Dev`, `Uvicorn-API`
 - **Shells/Utilities**: `Backend-Shell`, `Frontend-Shell`
 - **Services**: `Convex-Server`, `Orchestrator`
 - **Project Specific**: `Notion-Agent`, etc.
@@ -198,6 +360,12 @@ ls -la $HOME/code/ | grep -i "task"  # for "task templates"
 PROJECT_NAME="task-templates"  # or whatever the folder is called
 PROJECT_PATH="$HOME/code/$PROJECT_NAME"
 tmux new-session -d -s $PROJECT_NAME -c "$PROJECT_PATH"
+
+# Open the agent session in a new window/tab for monitoring
+# This allows the orchestrator to easily observe the agent
+tmux split-window -h -t $PROJECT_NAME:0 -c "$PROJECT_PATH"  # Split current window
+# OR create new window to monitor agent:
+# tmux new-window -n "Monitor-$PROJECT_NAME" "tmux attach-session -t $PROJECT_NAME"
 ```
 
 #### 3. Set Up Standard Windows
@@ -215,24 +383,83 @@ tmux new-window -t $PROJECT_NAME -n "Dev-Server" -c "$PROJECT_PATH"
 #### 4. Brief the Claude Agent
 ```bash
 # Send briefing message to Claude agent
-tmux send-keys -t $PROJECT_NAME:0 "claude" Enter
-sleep 5  # Wait for Claude to start
+tmux send-keys -t $PROJECT_NAME:0 "claude --dangerously-skip-permissions" Enter
+sleep 2  # Wait for permissions dialog
+tmux send-keys -t $PROJECT_NAME:0 "2" Enter  # Accept responsibility
+sleep 3  # Wait for Claude to fully start
 
 # Send the briefing
-tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME codebase. Your duties include:
-1. Getting the application running
-2. Checking GitHub issues for priorities  
-3. Working on highest priority tasks
-4. Keeping the orchestrator informed of progress
+tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME codebase as a Senior Principal Engineer. Your duties include:
+
+## 🎯 CRITICAL: SCOPE CONTROL (MANDATORY)
+**Do ONLY what's asked - nothing more, nothing less**:
+- If asked to fix a bug, ONLY fix that specific bug
+- DO NOT refactor, optimize, or improve unrelated code
+- DO NOT add features, logging, or enhancements unless explicitly requested
+- Make minimal changes to achieve the requested outcome
+- ASK before expanding scope or fixing related issues you discover
+- Touch as few files and lines as possible
+
+## Code Quality Standards (CRITICAL):
+1. **Read Project Documentation First**:
+   - Check for CLAUDE.md file in project root and follow all guidelines
+   - Look for .cursor/rules file and respect all coding rules
+   - Review any README.md or CONTRIBUTING.md for project-specific conventions
+   - Study any existing documentation about architecture and patterns
+
+2. **Follow Existing Patterns**: Study the existing codebase thoroughly and match:
+   - Code style and formatting conventions
+   - Architecture patterns and project structure  
+   - Naming conventions for files, functions, and variables
+   - Import/export patterns and module organization
+   - Error handling approaches used in the project
+
+3. **Senior Engineering Practices**:
+   - Write clean, readable, maintainable code
+   - Add comprehensive error handling and input validation ONLY when requested
+   - Include meaningful comments for complex logic ONLY when requested
+   - Follow SOLID principles and established design patterns
+   - Ensure code is testable and follows DRY principles
+   - Consider performance implications and edge cases
+
+4. **Design Implementation (Frontend Projects)**:
+   - If provided a Figma link, use the figma-mcp tools to extract design specs
+   - Download images and assets using mcp__figma-mcp__download_figma_images
+   - Get layout and component data using mcp__figma-mcp__get_figma_data
+   - Match design specifications exactly - pixel-perfect implementation
+
+5. **Frontend Verification**:
+   - Use playwright-mcp tools to verify frontend changes work correctly
+   - Take screenshots to compare against designs
+   - Test user interactions and workflows
+   - Validate responsive behavior across different screen sizes
+
+## Operational Duties:
+3. Getting the application running
+4. Checking GitHub issues for priorities  
+5. Working on highest priority tasks
+6. Keeping the orchestrator informed of progress
+
+**IMPORTANT**: 
+1. FIRST, check if there's a CLAUDE.md file in the project root - read it completely and follow all instructions
+2. NEXT, look for .cursor/rules file and respect all coding rules specified
+3. THEN, remind yourself to understand and use existing patterns, conventions, and architecture related to any changes
+4. Your code should feel like it was written by the same team that built the existing system
+5. MOST IMPORTANT: Stay strictly within assigned task scope - no unauthorized improvements
 
 First, analyze the project to understand:
+- Check for CLAUDE.md and .cursor/rules files and follow them strictly
 - What type of project this is (check package.json, requirements.txt, etc.)
+- The existing code patterns, architecture, and conventions
 - How to start the development server
 - What the main purpose of the application is
 
 Then start the dev server in window 2 (Dev-Server) and begin working on priority issues."
 sleep 1
 tmux send-keys -t $PROJECT_NAME:0 Enter
+
+# Switch to the agent session window for live monitoring
+tmux select-window -t $PROJECT_NAME:0
 ```
 
 #### 5. Project Type Detection (Agent Should Do This)
@@ -304,7 +531,10 @@ tmux new-window -t task-templates -n "Shell" -c "$HOME/code/task-templates"
 tmux new-window -t task-templates -n "Dev-Server" -c "$HOME/code/task-templates"
 
 # 4. Start Claude and brief
-tmux send-keys -t task-templates:0 "claude" Enter
+tmux send-keys -t task-templates:0 "claude --dangerously-skip-permissions" Enter
+sleep 2
+tmux send-keys -t task-templates:0 "2" Enter
+sleep 3
 # ... (briefing as above)
 ```
 
@@ -334,31 +564,67 @@ PROJECT_PATH=$(tmux display-message -t [session]:0 -p '#{pane_current_path}')
 
 # Create new window for PM
 tmux new-window -t [session] -n "Project-Manager" -c "$PROJECT_PATH"
+
+# Open PM window in the orchestrator session for monitoring
+ORCHESTRATOR_SESSION=$(tmux display-message -p '#{session_name}')
+tmux new-window -t $ORCHESTRATOR_SESSION -n "Monitor-PM-[session]" "tmux attach-session -t [session]:Project-Manager"
 ```
 
 #### 3. Start and Brief the PM
 ```bash
 # Start Claude
-tmux send-keys -t [session]:[PM-window] "claude" Enter
-sleep 5
+tmux send-keys -t [session]:[PM-window] "claude --dangerously-skip-permissions" Enter
+sleep 2
+tmux send-keys -t [session]:[PM-window] "2" Enter
+sleep 3
 
 # Send PM-specific briefing
-tmux send-keys -t [session]:[PM-window] "You are the Project Manager for this project. Your responsibilities:
+tmux send-keys -t [session]:[PM-window] "You are the Project Manager for this project with Senior Principal Engineer expertise. Your responsibilities:
 
-1. **Quality Standards**: Maintain exceptionally high standards. No shortcuts, no compromises.
-2. **Verification**: Test everything. Trust but verify all work.
-3. **Team Coordination**: Manage communication between team members efficiently.
-4. **Progress Tracking**: Monitor velocity, identify blockers, report to orchestrator.
-5. **Risk Management**: Identify potential issues before they become problems.
+1. **🎯 SCOPE CONTROL ENFORCEMENT (TOP PRIORITY)**: 
+   - Ensure agents do ONLY what's requested - nothing more, nothing less
+   - Stop agents who try to refactor, optimize, or improve unrelated code
+   - Verify agents ask permission before expanding scope
+   - Review all changes against the original request
+   - Reject any unauthorized improvements or feature additions
+
+2. **Code Quality Enforcement**: Ensure all code meets Senior Principal Engineer standards:
+   - Follows any CLAUDE.md file guidelines in the project root
+   - Respects all rules specified in .cursor/rules file
+   - Follows existing project patterns and conventions
+   - Uses established architecture patterns from the codebase
+   - Maintains consistency with existing naming conventions
+   - Includes proper error handling and input validation ONLY when requested
+   - Is clean, readable, and maintainable
+   - Follows SOLID principles and DRY practices
+
+3. **Quality Standards**: Maintain exceptionally high standards. No shortcuts, no compromises.
+4. **Verification**: Test everything. Trust but verify all work.
+5. **Team Coordination**: Manage communication between team members efficiently.
+6. **Progress Tracking**: Monitor velocity, identify blockers, report to orchestrator.
+7. **Risk Management**: Identify potential issues before they become problems.
+8. **MCP Tool Compliance**: Ensure agents use proper tools for design and testing:
+   - Verify agents use figma-mcp when provided Figma links
+   - Ensure frontend changes are tested with playwright-mcp
+   - Confirm visual verification and responsive testing is completed
 
 Key Principles:
 - Be meticulous about testing and verification
 - Create test plans for every feature
-- Ensure code follows best practices
-- Track technical debt
+- Ensure code follows existing project patterns and best practices
+- Review all code changes for consistency with project architecture
+- Track technical debt and enforce refactoring when needed
 - Communicate clearly and constructively
+- **MOST CRITICAL**: Prevent scope creep at all costs
+- **FRONTEND CRITICAL**: No frontend task is complete without playwright verification
 
-First, analyze the project and existing team members, then introduce yourself to the developer in window 0."
+**CRITICAL**: Before approving any code changes, verify they:
+- Follow any CLAUDE.md file guidelines in the project root
+- Respect all rules specified in .cursor/rules file  
+- Follow the existing patterns in the project and maintain architectural consistency
+- **Stay strictly within the requested scope with no unauthorized additions**
+
+First, check for CLAUDE.md and .cursor/rules files, analyze the project and existing team members, then introduce yourself to the developer in window 0."
 sleep 1
 tmux send-keys -t [session]:[PM-window] Enter
 ```
@@ -419,25 +685,45 @@ Priority: HIGH/MED/LOW
 
 ### When User Says "Work on [new project]"
 
-#### 1. Project Analysis
+#### 1. Use the Automated Agent Creator
 ```bash
-# Find project
-ls -la $HOME/code/ | grep -i "[project-name]"
+# Use the new script to create agent with automatic monitoring
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh [project-name] "Agent Role" [orchestrator-session]
 
-# Analyze project type
-cd $HOME/code/[project-name]
-test -f package.json && echo "Node.js project"
-test -f requirements.txt && echo "Python project"
+# Examples:
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh frontend "Frontend Developer" tmux-orc
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh backend "Backend Engineer" tmux-orc
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh mobile-app "Mobile Developer" orchestrator
 ```
 
-#### 2. Propose Team Structure
+#### 2. Automatic Monitoring Setup
+The script automatically:
+- Creates the agent session with standard windows (Agent, Shell, Dev-Server)
+- Starts Claude with proper permissions handling
+- Briefs the agent with role-specific instructions
+- **Opens a monitoring window in the orchestrator session**
+- Provides next steps for scheduling check-ins
 
-**Small Project**: 1 Developer + 1 PM
-**Medium Project**: 2 Developers + 1 PM + 1 QA  
-**Large Project**: Lead + 2 Devs + PM + QA + DevOps
+#### 3. Team Structure Recommendations
 
-#### 3. Deploy Team
-Create session and deploy all agents with specific briefings for their roles.
+**Small Project**: 1 Developer
+```bash
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh my-project "Full-Stack Developer" tmux-orc
+```
+
+**Medium Project**: Multiple specialists
+```bash
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh frontend "Frontend Developer" tmux-orc
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh backend "Backend Engineer" tmux-orc
+```
+
+**Large Project**: Full team with PM
+```bash
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh frontend "Frontend Lead" tmux-orc
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh backend "Backend Lead" tmux-orc
+$(dirname "${BASH_SOURCE[0]}")/create_agent_with_monitor.sh mobile "Mobile Developer" tmux-orc
+# Then create a PM in one of the sessions
+```
 
 ## Agent Lifecycle Management
 
@@ -481,6 +767,11 @@ $ORCHESTRATOR_DIR/registry/
 - [ ] Security best practices followed
 - [ ] Documentation is updated
 - [ ] No technical debt introduced
+- [ ] **Frontend**: Figma designs extracted with figma-mcp (if provided)
+- [ ] **Frontend**: All changes verified with playwright-mcp
+- [ ] **Frontend**: Screenshots taken for visual comparison
+- [ ] **Frontend**: Responsive behavior tested across viewport sizes
+- [ ] **Frontend**: Interactive elements tested (clicks, forms, hovers)
 
 ### Continuous Verification
 PMs should implement:
@@ -542,10 +833,13 @@ CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
 
 ## Anti-Patterns to Avoid
 
+- ❌ **Scope Creep**: Agents doing more than asked (BIGGEST PROBLEM)
+- ❌ **Unauthorized Improvements**: Adding features not requested
+- ❌ **Gold Plating**: Making code "better" when not asked
 - ❌ **Meeting Hell**: Use async updates only
 - ❌ **Endless Threads**: Max 3 exchanges, then escalate
 - ❌ **Broadcast Storms**: No "FYI to all" messages
-- ❌ **Micromanagement**: Trust agents to work
+- ❌ **Micromanagement**: Trust agents to work within scope
 - ❌ **Quality Shortcuts**: Never compromise standards
 - ❌ **Blind Scheduling**: Never schedule without verifying target window
 
@@ -701,8 +995,10 @@ $(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh ai-chat:2 "STATUS UPDATE: 
 ##### 1. Starting Claude and Initial Briefing
 ```bash
 # Start Claude first
-tmux send-keys -t project:0 "claude" Enter
-sleep 5
+tmux send-keys -t project:0 "claude --dangerously-skip-permissions" Enter
+sleep 2
+tmux send-keys -t project:0 "2" Enter
+sleep 3
 
 # Then use the script for the briefing
 $(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh project:0 "You are responsible for the frontend codebase. Please start by analyzing the current project structure and identifying any immediate issues."
