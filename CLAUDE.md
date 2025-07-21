@@ -3,6 +3,49 @@
 ## Project Overview
 The Tmux Orchestrator is an AI-powered session management system where Claude acts as the orchestrator for multiple Claude agents across tmux sessions, managing codebases and keeping development moving forward 24/7.
 
+## Configuration Setup
+
+### First-Time Setup
+
+**Run the setup script for automated configuration:**
+
+```bash
+cd /path/to/Tmux-Orchestrator
+./setup.sh
+```
+
+The setup script will:
+- ✅ Check for required dependencies (tmux, bc, logger)
+- ✅ Detect or create a suitable projects directory
+- ✅ Allow customization of configuration
+- ✅ Create necessary directories for logs and registry
+- ✅ Set proper permissions on all scripts
+- ✅ Validate the configuration
+- ✅ Save settings to `.orchestrator.conf`
+
+### Manual Configuration (Advanced)
+
+If you prefer manual setup, set these environment variables:
+
+```bash
+# In your ~/.bashrc or ~/.zshrc
+export PROJECTS_DIR="/path/to/your/projects"  # Where your code projects live
+export DEFAULT_SESSION_PREFIX="tmux-orc"     # Default session prefix
+```
+
+### Directory Detection
+
+The orchestrator intelligently searches for projects in common locations:
+- `$PROJECTS_DIR` (if set)
+- `$HOME/code` (most common)
+- `$HOME/Code` (macOS default)  
+- `$HOME/projects`
+- `$HOME/workspace`
+- `$HOME/dev`
+- And several other common patterns
+
+**All scripts are now fully portable** - no hardcoded paths!
+
 ## Agent System Architecture
 
 ### Orchestrator Role
@@ -142,18 +185,18 @@ Follow this systematic sequence to start any project:
 
 #### 1. Find the Project
 ```bash
-# List all directories in ~/Coding to find projects
-ls -la ~/Coding/ | grep "^d" | awk '{print $NF}' | grep -v "^\."
+# List all directories in $HOME/code to find projects
+ls -la $HOME/code/ | grep "^d" | awk '{print $NF}' | grep -v "^\."
 
 # If project name is ambiguous, list matches
-ls -la ~/Coding/ | grep -i "task"  # for "task templates"
+ls -la $HOME/code/ | grep -i "task"  # for "task templates"
 ```
 
 #### 2. Create Tmux Session
 ```bash
 # Create session with project name (use hyphens for spaces)
 PROJECT_NAME="task-templates"  # or whatever the folder is called
-PROJECT_PATH="/Users/jasonedward/Coding/$PROJECT_NAME"
+PROJECT_PATH="$HOME/code/$PROJECT_NAME"
 tmux new-session -d -s $PROJECT_NAME -c "$PROJECT_PATH"
 ```
 
@@ -249,16 +292,16 @@ tmux capture-pane -t $PROJECT_NAME:2 -p | grep -i error
 ### Example: Starting "Task Templates" Project
 ```bash
 # 1. Find project
-ls -la ~/Coding/ | grep -i task
+ls -la $HOME/code/ | grep -i task
 # Found: task-templates
 
 # 2. Create session
-tmux new-session -d -s task-templates -c "/Users/jasonedward/Coding/task-templates"
+tmux new-session -d -s task-templates -c "$HOME/code/task-templates"
 
 # 3. Set up windows
 tmux rename-window -t task-templates:0 "Claude-Agent"
-tmux new-window -t task-templates -n "Shell" -c "/Users/jasonedward/Coding/task-templates"
-tmux new-window -t task-templates -n "Dev-Server" -c "/Users/jasonedward/Coding/task-templates"
+tmux new-window -t task-templates -n "Shell" -c "$HOME/code/task-templates"
+tmux new-window -t task-templates -n "Dev-Server" -c "$HOME/code/task-templates"
 
 # 4. Start Claude and brief
 tmux send-keys -t task-templates:0 "claude" Enter
@@ -379,10 +422,10 @@ Priority: HIGH/MED/LOW
 #### 1. Project Analysis
 ```bash
 # Find project
-ls -la ~/Coding/ | grep -i "[project-name]"
+ls -la $HOME/code/ | grep -i "[project-name]"
 
 # Analyze project type
-cd ~/Coding/[project-name]
+cd $HOME/code/[project-name]
 test -f package.json && echo "Node.js project"
 test -f requirements.txt && echo "Python project"
 ```
@@ -409,7 +452,7 @@ tmux new-window -t [session] -n "TEMP-CodeReview"
 ```bash
 # 1. Capture complete conversation
 tmux capture-pane -t [session]:[window] -S - -E - > \
-  ~/Coding/Tmux\ orchestrator/registry/logs/[session]_[role]_$(date +%Y%m%d_%H%M%S).log
+  $ORCHESTRATOR_DIR/registry/logs/[session]_[role]_$(date +%Y%m%d_%H%M%S).log
 
 # 2. Create summary of work completed
 echo "=== Agent Summary ===" >> [logfile]
@@ -423,7 +466,7 @@ tmux kill-window -t [session]:[window]
 
 ### Agent Logging Structure
 ```
-~/Coding/Tmux orchestrator/registry/
+$ORCHESTRATOR_DIR/registry/
 ├── logs/            # Agent conversation logs
 ├── sessions.json    # Active session tracking
 └── notes/           # Orchestrator notes and summaries
@@ -617,36 +660,37 @@ When a command fails:
 
 #### 🎯 IMPORTANT: Always Use send-claude-message.sh Script
 
-**DO NOT manually send messages with tmux send-keys anymore!** We have a dedicated script that handles all the timing and complexity for you.
+**DO NOT manually send messages with tmux send-keys anymore!** We have a robust, portable script that handles all validation, timing, and error handling.
 
 #### Using send-claude-message.sh
 ```bash
 # Basic usage - ALWAYS use this instead of manual tmux commands
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh <target> "message"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh <target> "message"
 
 # Examples:
 # Send to a window
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh agentic-seek:3 "Hello Claude!"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh agentic-seek:3 "Hello Claude!"
 
 # Send to a specific pane in split-screen
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh tmux-orc:0.1 "Message to pane 1"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh tmux-orc:0.1 "Message to pane 1"
 
 # Send complex instructions
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh glacier-backend:0 "Please check the database schema for the campaigns table and verify all columns are present"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh glacier-backend:0 "Please check the database schema for the campaigns table and verify all columns are present"
 
 # Send status update requests
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh ai-chat:2 "STATUS UPDATE: What's your current progress on the authentication implementation?"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh ai-chat:2 "STATUS UPDATE: What's your current progress on the authentication implementation?"
 ```
 
 #### Why Use the Script?
 1. **Automatic timing**: Handles the critical 0.5s delay between message and Enter
-2. **Simpler commands**: One line instead of three
-3. **No timing mistakes**: Prevents the common error of Enter being sent too quickly
-4. **Works everywhere**: Handles both windows and panes automatically
-5. **Consistent messaging**: All agents receive messages the same way
+2. **Input validation**: Ensures proper tmux target format and message content
+3. **Error handling**: Validates sessions/windows exist before sending
+4. **Cross-platform**: Works on macOS, Linux, and other Unix systems
+5. **Logging**: All messages are logged for debugging and audit trails
+6. **Portable**: No hardcoded paths - works from any location
 
 #### Script Location and Usage
-- **Location**: `/Users/jasonedward/Coding/Tmux orchestrator/send-claude-message.sh`
+- **Location**: `<orchestrator-directory>/send-claude-message.sh`
 - **Permissions**: Already executable, ready to use
 - **Arguments**: 
   - First: target (session:window or session:window.pane)
@@ -661,34 +705,34 @@ tmux send-keys -t project:0 "claude" Enter
 sleep 5
 
 # Then use the script for the briefing
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh project:0 "You are responsible for the frontend codebase. Please start by analyzing the current project structure and identifying any immediate issues."
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh project:0 "You are responsible for the frontend codebase. Please start by analyzing the current project structure and identifying any immediate issues."
 ```
 
 ##### 2. Cross-Agent Coordination
 ```bash
 # Ask frontend agent about API usage
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh frontend:0 "Which API endpoints are you currently using from the backend?"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh frontend:0 "Which API endpoints are you currently using from the backend?"
 
 # Share info with backend agent
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh backend:0 "Frontend is using /api/v1/campaigns and /api/v1/flows endpoints"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh backend:0 "Frontend is using /api/v1/campaigns and /api/v1/flows endpoints"
 ```
 
 ##### 3. Status Checks
 ```bash
 # Quick status request
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "Quick status update please"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:0 "Quick status update please"
 
 # Detailed status request
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "STATUS UPDATE: Please provide: 1) Completed tasks, 2) Current work, 3) Any blockers"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:0 "STATUS UPDATE: Please provide: 1) Completed tasks, 2) Current work, 3) Any blockers"
 ```
 
 ##### 4. Providing Assistance
 ```bash
 # Share error information
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "I see in your server window that port 3000 is already in use. Try port 3001 instead."
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:0 "I see in your server window that port 3000 is already in use. Try port 3001 instead."
 
 # Guide stuck agents
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "The error you're seeing is because the virtual environment isn't activated. Run 'source venv/bin/activate' first."
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:0 "The error you're seeing is because the virtual environment isn't activated. Run 'source venv/bin/activate' first."
 ```
 
 #### OLD METHOD (DO NOT USE)
@@ -699,14 +743,14 @@ sleep 1
 tmux send-keys -t session:window Enter
 
 # ✅ DO THIS INSTEAD:
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:window "message"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:window "message"
 ```
 
 #### Checking for Responses
 After sending a message, check for the response:
 ```bash
 # Send message
-/Users/jasonedward/Coding/Tmux\ orchestrator/send-claude-message.sh session:0 "What's your status?"
+$(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh session:0 "What's your status?"
 
 # Wait a bit for response
 sleep 5
