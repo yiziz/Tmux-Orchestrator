@@ -95,7 +95,9 @@ EOF
 tmux new-session -s my-project
 
 # 3. Start project manager in window 0
-claude
+claude --dangerously-skip-permissions
+# Accept responsibility dialog (press 2)
+sleep 2 && tmux send-keys -t my-project:0 "2" Enter
 
 # 4. Give PM the spec and let it create an engineer
 "You are a Project Manager. Read project_spec.md and create an engineer 
@@ -111,7 +113,9 @@ cd /path/to/Tmux-Orchestrator
 ```bash
 # Start the orchestrator (after running setup.sh)
 tmux new-session -s orchestrator
-claude
+claude --dangerously-skip-permissions
+# Accept responsibility dialog (press 2)
+sleep 2 && tmux send-keys -t orchestrator:0 "2" Enter
 
 # Give it your projects
 "You are the Orchestrator. Set up project managers for:
