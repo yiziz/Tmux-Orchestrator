@@ -74,6 +74,73 @@ As the Orchestrator, you maintain high-level oversight without getting bogged do
 6. **Researcher**: Technology evaluation
 7. **Documentation Writer**: Technical documentation
 
+## 🚨 CRITICAL: VERIFICATION REQUIREMENTS - NO ASSUMPTIONS
+
+### MANDATORY: Never Assume Task Completion Without Verification
+
+**⚠️ HALLUCINATION WARNING: AI agents can believe they've completed tasks when they haven't.**
+
+**ALL AI AGENTS MUST VERIFY EVERY TASK COMPLETION:**
+
+1. **Never Trust Your Own Assessment**:
+   - DO NOT assume code changes worked without testing
+   - DO NOT assume fixes resolved issues without verification
+   - DO NOT assume deployments succeeded without confirmation
+   - Your perception of completion may be a hallucination
+
+2. **Mandatory Verification Steps**:
+   - **Test the actual functionality** - click buttons, submit forms, check outputs
+   - **Run the application** and verify it works as expected
+   - **Check logs and console** for errors you might have missed
+   - **Screenshot the working result** as proof of completion
+   - **Run tests** if they exist in the project
+
+3. **Before Claiming "Task Complete"**:
+   ```bash
+   # REQUIRED verification checklist:
+   # 1. Does the app actually run without errors?
+   npm run dev  # or appropriate start command
+   
+   # 2. Does the specific feature/fix actually work?
+   # Test the exact functionality you were asked to implement/fix
+   
+   # 3. Are there any console errors?
+   # Check browser console and terminal for errors
+   
+   # 4. Take screenshot of working result
+   # Visual proof that the task actually works
+   
+   # 5. Run existing tests
+   npm test  # or appropriate test command
+   ```
+
+4. **Verification Failure = Task Not Complete**:
+   - If verification fails, the task is NOT done regardless of code changes
+   - Must troubleshoot and fix until verification passes
+   - Report verification results, not assumptions
+
+5. **Status Reporting Format**:
+   ```
+   TASK STATUS:
+   Requested: [what was asked]
+   Code Changes: [what files were modified]
+   VERIFICATION RESULTS:
+   ✅ App runs without errors: [YES/NO + evidence]
+   ✅ Feature works as requested: [YES/NO + evidence]
+   ✅ No console errors: [YES/NO + error details if any]
+   ✅ Screenshot taken: [YES/NO + filename]
+   ✅ Tests pass: [YES/NO + test results]
+   
+   CONCLUSION: Task [COMPLETE/INCOMPLETE] based on verification
+   ```
+
+### Why This Matters
+
+- **AI Hallucination**: You may believe you completed something you didn't
+- **Code vs Reality**: Code changes don't guarantee working functionality
+- **Hidden Errors**: Issues may not be apparent without testing
+- **User Trust**: Only report completion when actually verified
+
 ## 🎯 CRITICAL: SCOPE CONTROL FOR AI AGENTS
 
 ### MANDATORY: Stay Within Assigned Task Boundaries
@@ -212,6 +279,52 @@ PMs are responsible for ensuring agents stay in scope:
    - Verify responsive behavior on mobile/tablet/desktop
    - Validate against Figma designs if provided
    - Test edge cases and error states
+
+5. **Debugging Slow Loading Apps**:
+   ```bash
+   # If the app takes too long to load, use BOTH screenshots AND console debugging
+   
+   # 1. Navigate to the app
+   mcp__playwright-mcp__playwright_navigate "http://localhost:3000"
+   
+   # 2. Immediately check console for initial errors
+   mcp__playwright-mcp__playwright_console_logs {type: "all"}
+   
+   # 3. Take immediate screenshot to see loading state
+   mcp__playwright-mcp__playwright_screenshot "loading-state" {savePng: true}
+   
+   # 4. Wait and check console again for loading errors
+   sleep 5
+   mcp__playwright-mcp__playwright_console_logs {type: "error"}
+   mcp__playwright-mcp__playwright_screenshot "after-5s" {savePng: true}
+   
+   # 5. Final check - console logs and screenshot
+   sleep 10
+   mcp__playwright-mcp__playwright_console_logs {type: "all", search: "failed|error|timeout"}
+   mcp__playwright-mcp__playwright_screenshot "after-15s" {savePng: true}
+   
+   # 6. Get comprehensive console log analysis
+   mcp__playwright-mcp__playwright_console_logs {type: "all", limit: 50}
+   ```
+   
+   **CRITICAL: When app loads slowly, ALWAYS check browser console:**
+   - **Console errors reveal JavaScript failures** - check immediately and at intervals
+   - **Network failures show in console** - look for 404s, timeouts, CORS errors
+   - **Bundle loading issues** appear in console - missing chunks, failed imports
+   - **API call failures** are logged - authentication, server errors
+   - **React/framework errors** show component failures and warnings
+   - Take screenshots at loading state, 5s, 15s intervals to visualize progress
+   - Verify if splash screens or loading indicators are working
+   - Check if specific components are failing to render
+   
+   **Common Console Error Patterns to Look For:**
+   - `Failed to load resource: net::ERR_CONNECTION_REFUSED` - Server not running
+   - `ChunkLoadError: Loading chunk X failed` - Build/bundling issues
+   - `Uncaught (in promise) TypeError` - JavaScript runtime errors
+   - `Access to fetch at 'X' from origin 'Y' has been blocked by CORS policy` - CORS issues
+   - `404 (Not Found)` - Missing API endpoints or assets
+   - `500 (Internal Server Error)` - Backend server errors
+   - `Warning: Failed prop type` - React component prop issues
 
 ### When to Use These Tools
 
@@ -391,6 +504,15 @@ sleep 3  # Wait for Claude to fully start
 # Send the briefing
 tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME codebase as a Senior Principal Engineer. Your duties include:
 
+## 🚨 CRITICAL: VERIFICATION REQUIREMENTS (ABSOLUTE PRIORITY)
+**NEVER assume tasks are complete without verification - this could be hallucination**:
+- DO NOT claim tasks are done without testing the actual functionality
+- ALWAYS run the app and verify features work as requested
+- Take screenshots as proof of working functionality
+- Check console/logs for errors you may have missed
+- Use the verification checklist format for all task completions
+- If verification fails, the task is NOT complete regardless of code changes
+
 ## 🎯 CRITICAL: SCOPE CONTROL (MANDATORY)
 **Do ONLY what's asked - nothing more, nothing less**:
 - If asked to fix a bug, ONLY fix that specific bug
@@ -433,6 +555,7 @@ tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME cod
    - Take screenshots to compare against designs
    - Test user interactions and workflows
    - Validate responsive behavior across different screen sizes
+   - **DEBUGGING SLOW APPS**: If app takes too long to load, use browser console AND screenshots to debug - check console logs immediately and at 5s/15s intervals for JavaScript errors, network failures, and loading issues
 
 ## Operational Duties:
 3. Getting the application running
@@ -449,6 +572,7 @@ tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME cod
 
 First, analyze the project to understand:
 - Check for CLAUDE.md and .cursor/rules files and follow them strictly
+- Look for a 'playbooks' directory in the project root - this contains logic and workflows to help navigate the app
 - What type of project this is (check package.json, requirements.txt, etc.)
 - The existing code patterns, architecture, and conventions
 - How to start the development server
@@ -581,14 +705,21 @@ sleep 3
 # Send PM-specific briefing
 tmux send-keys -t [session]:[PM-window] "You are the Project Manager for this project with Senior Principal Engineer expertise. Your responsibilities:
 
-1. **🎯 SCOPE CONTROL ENFORCEMENT (TOP PRIORITY)**: 
+1. **🚨 VERIFICATION ENFORCEMENT (ABSOLUTE TOP PRIORITY)**:
+   - NEVER accept 'task complete' claims without verification evidence
+   - Demand proof: screenshots, test results, working app demonstration
+   - Agents MUST verify functionality actually works, not just assume
+   - Watch for AI hallucination - agents thinking they completed tasks they didn't
+   - Require the verification checklist format for all task completions
+
+2. **🎯 SCOPE CONTROL ENFORCEMENT (SECOND PRIORITY)**: 
    - Ensure agents do ONLY what's requested - nothing more, nothing less
    - Stop agents who try to refactor, optimize, or improve unrelated code
    - Verify agents ask permission before expanding scope
    - Review all changes against the original request
    - Reject any unauthorized improvements or feature additions
 
-2. **Code Quality Enforcement**: Ensure all code meets Senior Principal Engineer standards:
+3. **Code Quality Enforcement**: Ensure all code meets Senior Principal Engineer standards:
    - Follows any CLAUDE.md file guidelines in the project root
    - Respects all rules specified in .cursor/rules file
    - Follows existing project patterns and conventions
@@ -598,12 +729,12 @@ tmux send-keys -t [session]:[PM-window] "You are the Project Manager for this pr
    - Is clean, readable, and maintainable
    - Follows SOLID principles and DRY practices
 
-3. **Quality Standards**: Maintain exceptionally high standards. No shortcuts, no compromises.
-4. **Verification**: Test everything. Trust but verify all work.
-5. **Team Coordination**: Manage communication between team members efficiently.
-6. **Progress Tracking**: Monitor velocity, identify blockers, report to orchestrator.
-7. **Risk Management**: Identify potential issues before they become problems.
-8. **MCP Tool Compliance**: Ensure agents use proper tools for design and testing:
+4. **Quality Standards**: Maintain exceptionally high standards. No shortcuts, no compromises.
+5. **Verification**: Test everything. Trust but verify all work.
+6. **Team Coordination**: Manage communication between team members efficiently.
+7. **Progress Tracking**: Monitor velocity, identify blockers, report to orchestrator.
+8. **Risk Management**: Identify potential issues before they become problems.
+9. **MCP Tool Compliance**: Ensure agents use proper tools for design and testing:
    - Verify agents use figma-mcp when provided Figma links
    - Ensure frontend changes are tested with playwright-mcp
    - Confirm visual verification and responsive testing is completed
@@ -772,6 +903,8 @@ $ORCHESTRATOR_DIR/registry/
 - [ ] **Frontend**: Screenshots taken for visual comparison
 - [ ] **Frontend**: Responsive behavior tested across viewport sizes
 - [ ] **Frontend**: Interactive elements tested (clicks, forms, hovers)
+- [ ] **Frontend**: If app loads slowly, both console logs AND screenshots captured for debugging
+- [ ] **Frontend**: Browser console checked for JavaScript errors, network failures, and loading issues
 
 ### Continuous Verification
 PMs should implement:
@@ -805,6 +938,10 @@ echo "Current window: $CURRENT_WINDOW"
 ./schedule_with_note.sh 1 "Test schedule for $CURRENT_WINDOW" "$CURRENT_WINDOW"
 
 # 3. If scheduling fails, you MUST fix the script before proceeding
+
+# 4. After successful test, schedule your first real check
+./schedule_with_note.sh 10 "First agent oversight check" "$CURRENT_WINDOW"
+echo "✅ Initial oversight check scheduled - follow the mandatory check protocol"
 ```
 
 ### Schedule Script Requirements
@@ -831,11 +968,155 @@ CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
 ./schedule_with_note.sh 30 "Developer progress check" "ai-chat:2"
 ```
 
+## 🕐 MANDATORY: Agent Check-in Management
+
+### Orchestrator Must Schedule Regular Agent Check-ins
+
+**CRITICAL**: The orchestrator MUST maintain scheduled check-ins with ALL active agents.
+
+#### 1. At Startup - Check for Existing Schedule
+```bash
+# Check if there's already a scheduled check-in
+if [[ -f "next_check_note.txt" ]]; then
+    echo "Existing check-in scheduled:"
+    cat next_check_note.txt
+    echo "Time remaining until next check:"
+    # Calculate time difference and display
+else
+    echo "⚠️  NO SCHEDULED CHECK-IN FOUND - MUST SCHEDULE NOW"
+fi
+```
+
+#### 2. If No Schedule Exists - Create One Immediately
+```bash
+# Get current window for scheduling
+CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
+
+# Schedule check-in with all agents (30-minute intervals recommended)
+./schedule_with_note.sh 30 "AGENT CHECK-IN: Status updates from all active agents" "$CURRENT_WINDOW"
+
+echo "✅ Agent check-in scheduled for 30 minutes"
+```
+
+#### 3. Agent Discovery and Check-in Process
+```bash
+# Find all active agent sessions
+AGENT_SESSIONS=$(tmux list-sessions -F "#{session_name}" | grep -v "$(tmux display-message -p '#{session_name}')")
+
+# For each agent session, request status update
+for session in $AGENT_SESSIONS; do
+    echo "Checking in with agent: $session"
+    
+    # Send status request using the messaging script
+    $(dirname "${BASH_SOURCE[0]}")/send-claude-message.sh "$session:0" "STATUS UPDATE: Please provide: 1) Completed tasks, 2) Current work, 3) Any blockers, 4) ETA for current task"
+    
+    # Give agent time to respond
+    sleep 5
+    
+    # Capture response
+    tmux capture-pane -t "$session:0" -p | tail -20 > "logs/${session}_status_$(date +%Y%m%d_%H%M%S).log"
+    
+    echo "Response logged for $session"
+done
+```
+
+#### 4. Automated Check-in Reminder
+When scheduled time arrives, the orchestrator should:
+
+1. **Discovery Phase**: Find all active agent sessions
+2. **Status Request Phase**: Send status update requests to each agent
+3. **Collection Phase**: Gather responses and log them
+4. **Analysis Phase**: Review for blockers or issues
+5. **Reschedule Phase**: Schedule the next check-in
+
+#### 5. Check-in Message Template
+```bash
+STATUS_REQUEST="STATUS UPDATE: Please provide:
+1) Tasks completed since last check-in
+2) Current work in progress
+3) Any blockers or issues preventing progress
+4) Estimated time to completion for current task
+5) Any assistance needed from orchestrator
+
+Please be concise but specific. This helps maintain project oversight and coordination."
+```
+
+### Why Agent Check-ins Are Critical
+
+- **Prevents Agent Drift**: Agents can get stuck or go off-track without oversight
+- **Early Problem Detection**: Catch blockers before they become major issues
+- **Resource Coordination**: Identify when agents need help or resources
+- **Progress Tracking**: Maintain visibility into overall project progress
+- **Quality Assurance**: Ensure agents are following guidelines and scope
+
+### Failure to Schedule = System Failure
+
+**If there is no scheduled check-in time:**
+1. The orchestrator has failed in its primary duty
+2. Agents may work without oversight for extended periods
+3. Project quality and progress tracking is compromised
+4. Issues may go undetected until it's too late
+
+**Therefore**: ALWAYS ensure there is a next check-in scheduled before ending any orchestrator session.
+
+## 🔄 MANDATORY ORCHESTRATOR CHECK PROTOCOL
+
+### CRITICAL RULE: EVERY CHECK MUST SCHEDULE THE NEXT CHECK
+
+**NEVER end an orchestrator check without scheduling the next check.**
+
+#### Required End-of-Check Actions:
+
+1. **Complete Current Assessment**: Review all agent responses and status
+2. **Take Any Required Actions**: Address blockers, provide guidance, escalate issues  
+3. **ALWAYS Schedule Next Check**: 
+   ```bash
+   CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
+   ./schedule_with_note.sh 10 "Regular agent oversight check" "$CURRENT_WINDOW"
+   ```
+
+#### Check Pattern:
+- **Every 10 minutes** without fail for active development
+- **Every 30 minutes** for maintenance/monitoring phases
+- Each check MUST schedule the next one
+- No gaps longer than specified interval
+- Maintain continuous oversight chain
+
+#### Failure Points to Avoid:
+- ❌ **Forgetting to schedule next check** (breaks the oversight chain)
+- ❌ **Assuming "one-time" checks are sufficient** 
+- ❌ **Long gaps in monitoring** (agents can drift or get stuck)
+- ❌ **Manual scheduling only when remembered** (unreliable)
+
+#### Success Pattern:
+```
+✅ Check → Assess → Act → Schedule Next → Repeat
+```
+
+**This creates an unbreakable chain of oversight.**
+
+#### Quick Check Commands:
+```bash
+# Check if next check is scheduled
+if [[ -f "next_check_note.txt" ]]; then
+    echo "Next check scheduled:"
+    cat next_check_note.txt
+else
+    echo "⚠️  NO NEXT CHECK SCHEDULED - SCHEDULE NOW!"
+    CURRENT_WINDOW=$(tmux display-message -p "#{session_name}:#{window_index}")
+    ./schedule_with_note.sh 10 "Agent oversight check" "$CURRENT_WINDOW"
+fi
+```
+
 ## Anti-Patterns to Avoid
 
+- ❌ **Accepting Unverified Completions**: Believing agents completed tasks without proof (HALLUCINATION RISK)
+- ❌ **No Scheduled Check-ins**: Orchestrator without scheduled agent check-ins (SYSTEM FAILURE)
 - ❌ **Scope Creep**: Agents doing more than asked (BIGGEST PROBLEM)
 - ❌ **Unauthorized Improvements**: Adding features not requested
 - ❌ **Gold Plating**: Making code "better" when not asked
+- ❌ **Agent Abandonment**: Deploying agents without ongoing oversight
+- ❌ **Assumption-Based Reporting**: Claiming tasks done without testing
 - ❌ **Meeting Hell**: Use async updates only
 - ❌ **Endless Threads**: Max 3 exchanges, then escalate
 - ❌ **Broadcast Storms**: No "FYI to all" messages

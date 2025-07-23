@@ -73,6 +73,15 @@ BRIEFING_FILE=$(mktemp)
 cat > "$BRIEFING_FILE" << 'EOF'
 You are a {AGENT_ROLE} for the {PROJECT_NAME} project with the expertise of a Senior Principal Engineer. Your responsibilities:
 
+## 🚨 CRITICAL: VERIFICATION REQUIREMENTS (ABSOLUTE PRIORITY)
+**NEVER assume tasks are complete without verification - this could be hallucination**:
+- DO NOT claim tasks are done without testing the actual functionality
+- ALWAYS run the app and verify features work as requested
+- Take screenshots as proof of working functionality
+- Check console/logs for errors you may have missed
+- Use the verification checklist format for all task completions
+- If verification fails, the task is NOT complete regardless of code changes
+
 ## 🎯 CRITICAL: SCOPE CONTROL (MANDATORY)
 **Do ONLY what's asked - nothing more, nothing less**:
 - If asked to fix a bug, ONLY fix that specific bug
@@ -115,6 +124,7 @@ You are a {AGENT_ROLE} for the {PROJECT_NAME} project with the expertise of a Se
    - Take screenshots to compare against designs
    - Test user interactions and workflows
    - Validate responsive behavior across different screen sizes
+   - **DEBUGGING SLOW APPS**: If app takes too long to load, use browser console AND screenshots to debug - check console logs immediately and at 5s/15s intervals for JavaScript errors, network failures, and loading issues
 
 ## Operational Duties:
 6. Analyze the project structure and understand the full technology stack
@@ -132,7 +142,7 @@ Project path: {PROJECT_PATH}
 4. Your code should feel like it was written by the same team that built the existing system
 5. MOST IMPORTANT: Stay strictly within assigned task scope - no unauthorized improvements
 
-Start by checking for project documentation (CLAUDE.md, .cursor/rules), then examining the technology stack and getting the development server running.
+Start by checking for project documentation (CLAUDE.md, .cursor/rules), look for a 'playbooks' directory with navigation logic, then examining the technology stack and getting the development server running.
 EOF
 
 # Replace placeholders (cross-platform sed)
