@@ -460,18 +460,22 @@ Follow this systematic sequence to start any project:
 
 #### 1. Find the Project
 ```bash
-# List all directories in $HOME/code to find projects
-ls -la $HOME/code/ | grep "^d" | awk '{print $NF}' | grep -v "^\."
+# ALWAYS load configuration first to get correct projects directory
+source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
+echo "Using projects directory: $PROJECTS_DIR"
+
+# List all directories in the configured projects directory
+ls -la "$PROJECTS_DIR" | grep "^d" | awk '{print $NF}' | grep -v "^\."
 
 # If project name is ambiguous, list matches
-ls -la $HOME/code/ | grep -i "task"  # for "task templates"
+ls -la "$PROJECTS_DIR" | grep -i "task"  # for "task templates"
 ```
 
 #### 2. Create Tmux Session
 ```bash
-# Create session with project name (use hyphens for spaces)
+# Use configuration-based project path
 PROJECT_NAME="task-templates"  # or whatever the folder is called
-PROJECT_PATH="$HOME/code/$PROJECT_NAME"
+PROJECT_PATH="$PROJECTS_DIR/$PROJECT_NAME"
 tmux new-session -d -s $PROJECT_NAME -c "$PROJECT_PATH"
 
 # Open the agent session in a new window/tab for monitoring
@@ -563,14 +567,15 @@ tmux send-keys -t $PROJECT_NAME:0 "You are responsible for the $PROJECT_NAME cod
 5. Working on highest priority tasks
 6. Keeping the orchestrator informed of progress
 
-**IMPORTANT**: 
-1. FIRST, check if there's a CLAUDE.md file in the project root - read it completely and follow all instructions
-2. NEXT, look for .cursor/rules file and respect all coding rules specified
-3. THEN, remind yourself to understand and use existing patterns, conventions, and architecture related to any changes
-4. Your code should feel like it was written by the same team that built the existing system
-5. MOST IMPORTANT: Stay strictly within assigned task scope - no unauthorized improvements
+**CRITICAL BEFORE EVERY TASK**: 
+1. ALWAYS verify you're in the correct projects directory by running: echo $PROJECTS_DIR && pwd
+2. FIRST, check if there's a CLAUDE.md file in the project root - read it completely and follow all instructions
+3. NEXT, look for .cursor/rules file and respect all coding rules specified
+4. THEN, remind yourself to understand and use existing patterns, conventions, and architecture related to any changes
+5. Your code should feel like it was written by the same team that built the existing system
+6. MOST IMPORTANT: Stay strictly within assigned task scope - no unauthorized improvements
 
-First, analyze the project to understand:
+BEFORE EVERY TASK - verify directory and analyze the project to understand:
 - Check for CLAUDE.md and .cursor/rules files and follow them strictly
 - Look for a 'playbooks' directory in the project root - this contains logic and workflows to help navigate the app
 - What type of project this is (check package.json, requirements.txt, etc.)
@@ -1110,6 +1115,7 @@ fi
 
 ## Anti-Patterns to Avoid
 
+- ❌ **Wrong Directory Assumptions**: Working without verifying correct projects directory (CAUSES CONFUSION)
 - ❌ **Accepting Unverified Completions**: Believing agents completed tasks without proof (HALLUCINATION RISK)
 - ❌ **No Scheduled Check-ins**: Orchestrator without scheduled agent check-ins (SYSTEM FAILURE)
 - ❌ **Scope Creep**: Agents doing more than asked (BIGGEST PROBLEM)
